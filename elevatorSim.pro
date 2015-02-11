@@ -4,7 +4,8 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += main.cpp \
-    person.cpp
+    person.cpp \
+    PersonTest.cpp
 
 HEADERS += \
     person.h
