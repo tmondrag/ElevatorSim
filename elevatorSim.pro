@@ -5,8 +5,10 @@ CONFIG -= qt
 
 SOURCES += main.cpp \
     person.cpp \
-    PersonTest.cpp
+    PersonTest.cpp \
+    personqueue.cpp
 
 HEADERS += \
-    person.h
+    person.h \
+    personqueue.h
 
