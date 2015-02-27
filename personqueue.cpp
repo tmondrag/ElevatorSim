@@ -1,129 +1,162 @@
 #include "personqueue.h"
 #include <iostream>
+#include <assert.h>
 
 PersonQueue::PersonQueue()
 {
+  int rc;
   pnode_t * tmp = new pnode_t;
+  assert(tmp != NULL);
   tmp->next = NULL;
   head = tail = tmp;
-  pthread_mutex_init(&headLock,NULL);
-  pthread_mutex_init(&tailLock,NULL);
+  rc = pthread_mutex_init(&headLock,NULL);
+  assert(rc == 0);
+  rc = pthread_mutex_init(&tailLock,NULL);
+  assert(rc == 0);
 }
 
 void PersonQueue::enqueue(Person * p)
 {
+  int rc;
   pnode_t * tmp = new pnode_t;
+  assert(tmp != NULL);
   tmp->value = p;
   tmp->next = NULL;
 
-  pthread_mutex_lock(&tailLock);
+  rc = pthread_mutex_lock(&tailLock);
+  assert(rc == 0);
   tail->next = tmp;
   tail = tmp;
-  pthread_mutex_unlock(&tailLock);
+  rc = pthread_mutex_unlock(&tailLock);
+  assert(rc == 0);
 }
 
 Person * PersonQueue::dequeue()
 {
-  pthread_mutex_lock(&headLock);
+  int rc;
+  rc = pthread_mutex_lock(&headLock);
+  assert(rc == 0);
   pnode_t * temp = head;
   pnode_t * newHead = temp->next;
   if(newHead == NULL)
   {
-    pthread_mutex_unlock(&headLock);
+    rc = pthread_mutex_unlock(&headLock);
+    assert(rc == 0);
     return NULL; // Queue was empty
   }
   Person * tempP = newHead->value;
   head = newHead;
-  pthread_mutex_unlock(&headLock);
+  rc = pthread_mutex_unlock(&headLock);
+  assert(rc == 0);
   delete temp;
   return tempP;
 }
 
 bool PersonQueue::isEmpty()
 {
-  pthread_mutex_lock(&headLock);
+  int rc;
+  rc = pthread_mutex_lock(&headLock);
+  assert(rc == 0);
   pnode_t * temp = head;
   pnode_t * newHead = temp->next;
   if(newHead == NULL)
   {
-    pthread_mutex_unlock(&headLock);
+    rc = pthread_mutex_unlock(&headLock);
+    assert(rc == 0);
     return true; // Queue is empty
   }
   else
   {
-    pthread_mutex_unlock(&headLock);
+    rc = pthread_mutex_unlock(&headLock);
+    assert(rc == 0);
     return false;
   }
 }
 
 PersonQueue::~PersonQueue()
 {
-  pthread_mutex_lock(&headLock);
+  int rc;
+  rc = pthread_mutex_lock(&headLock);
+  assert(rc == 0);
   Person * temp = head->next->value;
-  pthread_mutex_unlock(&headLock);
+  rc = pthread_mutex_unlock(&headLock);
+  assert(rc == 0);
   while(temp != NULL)
     temp = dequeue();
 }
 
 PersonStack::PersonStack()
 {
+  int rc;
   pnode_t * tmp = new pnode_t;
   tmp->next = NULL;
   head = /*tail =*/ tmp;
-  pthread_mutex_init(&headLock,NULL);
+  rc = pthread_mutex_init(&headLock,NULL);
+  assert(rc == 0);
   //pthread_mutex_init(&tailLock,NULL);
 }
 
 void PersonStack::push(Person * p)
 {
+  int rc;
   pnode_t * tmp = new pnode_t;
   tmp->value = p;
 
-  pthread_mutex_lock(&headLock);
+  rc = pthread_mutex_lock(&headLock);
+  assert(rc == 0)
   tmp->next = head->next->next;
   head->next = tmp;
-  pthread_mutex_unlock(&headLock);
+  rc = pthread_mutex_unlock(&headLock);
+  assert(rc == 0);
 }
 
 Person * PersonStack::pop()
 {
-  pthread_mutex_lock(&headLock);
+  int rc = pthread_mutex_lock(&headLock);
+  assert(rc == 0);
   pnode_t * temp = head;
   pnode_t * newHead = temp->next;
   if(newHead == NULL)
   {
-    pthread_mutex_unlock(&headLock);
+    rc = pthread_mutex_unlock(&headLock);
+    assert(rc == 0);
     return NULL; // Stack was empty
   }
   Person * tempP = newHead->value;
   head = newHead;
-  pthread_mutex_unlock(&headLock);
+  rc = pthread_mutex_unlock(&headLock);
+  assert(rc == 0);
   delete temp;
   return tempP;
 }
 
 bool PersonStack::isEmpty()
 {
-  pthread_mutex_lock(&headLock);
+  int rc = pthread_mutex_lock(&headLock);
+  assert(rc == 0);
   pnode_t * temp = head;
   pnode_t * newHead = temp->next;
   if(newHead == NULL)
   {
-    pthread_mutex_unlock(&headLock);
+    rc = pthread_mutex_unlock(&headLock);
+    assert(rc == 0);
     return true; // Stack is empty
   }
   else
   {
-    pthread_mutex_unlock(&headLock);
+    rc = pthread_mutex_unlock(&headLock);
+    assert(rc == 0);
     return false;
   }
 }
 
 PersonStack::~PersonStack()
 {
-  pthread_mutex_lock(&headLock);
+  int rc = pthread_mutex_lock(&headLock);
+  assert(rc == 0);
   Person * temp = head->next->value;
-  pthread_mutex_unlock(&headLock);
+  rc = pthread_mutex_unlock(&headLock);
+  assert(rc == 0);
   while(temp != NULL)
     temp = pop();
 }
