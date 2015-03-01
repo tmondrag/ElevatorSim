@@ -16,9 +16,12 @@
 
 pthread_cond_t qfill, sfill;
 pthread_mutex_t qmutex, smutex;
-int qcount,scount;
+int qcount,scount,loops;
 PersonQueue * floor;
 PersonStack * elevator;
+
+std::string first = "First Name";
+std::string last = "person";
 
 template <typename T>
   std::string NumberToString ( T Number )
@@ -44,40 +47,79 @@ int StringToInt(char* s)
   return x;
 }
 
-/*void * populatr(void * arg)
+void * populator(void * arg)
 {
-  int i, rc;
-  for (i = 0; i < loops; i++)
+  int i,rc;
+  Person * tmp;
+  for(i = 0; i < loops; i++)
   {
-    rc = pthread_mutex_lock(&qmutex); // p1
-    assert(rc == 0);
-
-
-
-  put(i); // p4
-  Pthread_cond_signal(&fill); // p5
-  Pthread_mutex_unlock(&mutex); // p6
+    tmp = new Person(first,last+NumberToString(i),1,2);
+    floor->enqueue(tmp);
+    rc = pthread_mutex_lock(&qmutex);assert(rc == 0);
+    //in the multifloor version, the queue's own mutex and condition should be used?
+    //no waiting because infinite buffer
+    qcount++;
+    rc = pthread_cond_signal(&qfill);assert(rc == 0);
+    int rc = pthread_mutex_unlock(&qmutex);assert(rc == 0);
   }
+  return NULL;
 }
-*/
+
 void * elevatorLoader(void * arg)
 {
-  /*int i;
+  int i,rc,l;
+  Person * tmp;
   for (i = 0; i < loops; i++)
   {
-    Pthread_mutex_lock(&mutex); // c1
-    while (count == 0) // c2
-      Pthread_cond_wait(&fill, &mutex); // c3
-    int tmp = get(); // c4
-    Pthread_cond_signal(&empty); // c5
-    Pthread_mutex_unlock(&mutex); // c6
-    printf("%d\n", tmp);
-  }*/
+    rc = pthread_mutex_lock(&qmutex);assert(rc == 0); // c1
+    while (qcount == 0) // c2
+    {
+      rc = pthread_cond_wait(&qfill, &qmutex);assert(rc == 0); // c3
+    }//huh... maybe I should incorporate this into dequeue instead?
+    tmp = floor->dequeue(); // c4
+    qcount--; // c5
+    if(qcount > 0)
+    {
+      rc = pthread_cond_signal(&qfill);assert(rc == 0);
+    }
+    rc = pthread_mutex_unlock(&qmutex);assert(rc == 0); // c6
+
+    elevator->push(tmp);
+    rc = pthread_mutex_lock(&smutex);assert(rc == 0);
+    //in the multifloor version, the stack's own mutex and condition should be used?
+    //no waiting because infinite buffer
+    //std::cout<<tmp->firstName<<" "<<tmp->lastName<<" gets on the elevator"<<std::endl;
+    //for(l=0;l<1000000;l++)
+    //    rc=rc+l;
+    scount++;
+    rc = pthread_cond_signal(&sfill);assert(rc == 0);
+    rc = pthread_mutex_unlock(&smutex);assert(rc == 0);
+  }
+
   return NULL;
 }
 
 void * elevatorUnloader(void * arg)
 {
+    int i,rc;
+    Person * tmp;
+    for (i = 0; i < loops; i++)
+    {
+      rc = pthread_mutex_lock(&smutex);assert(rc == 0); // c1
+      while (scount == 0) // c2
+      {
+        rc = pthread_cond_wait(&sfill, &smutex);assert(rc == 0); // c3
+      }//huh... maybe I should incorporate this into pop instead?
+      tmp = elevator->pop(); // c4
+      scount--; // c5
+      if(scount > 0)
+      {
+        rc = pthread_cond_signal(&sfill);assert(rc == 0);
+      }
+      tmp->currfloor=tmp->destination;
+      delete tmp;
+      rc = pthread_mutex_unlock(&smutex);assert(rc == 0); // c6
+    }
   return NULL;
 }
 
@@ -85,18 +127,16 @@ void * elevatorUnloader(void * arg)
 int main(int argc, char *argv[])
 {
   assert(argc > 0);
-  int loops = StringToInt(argv[1]);
+  loops = StringToInt(argv[1]);
   int i = 0;
   int rc;
   Person * tempPerson;
-  std::string first = "First Name";
-  std::string last = "person";
 
   elevator = new PersonStack();
   floor = new PersonQueue();
 
   // -- single thread test -- //
-  for(i = 0; i < loops; i++)
+  /*for(i = 0; i < loops; i++)
   {
     tempPerson = new Person(first,last+NumberToString(i),1,2);
     floor->enqueue(tempPerson);
@@ -109,7 +149,7 @@ int main(int argc, char *argv[])
     tempPerson = elevator->pop();
     tempPerson->currfloor = 2;
     delete tempPerson;
-  }
+  }*/
 
   // -- single stack and queue, multiple threads -- //
   pthread_t threads[3];
@@ -119,17 +159,19 @@ int main(int argc, char *argv[])
   rc = pthread_cond_init(&sfill,NULL);assert(rc == 0);
   rc = pthread_cond_init(&qfill,NULL);assert(rc == 0);
 
-  rc = pthread_create(&threads[0],NULL,elevatorLoader,NULL);assert(rc == 0);
-  rc = pthread_create(&threads[1],NULL,elevatorUnloader,NULL);assert(rc == 0);
+  rc = pthread_create(&threads[0],NULL,populator,NULL);assert(rc == 0);
+  rc = pthread_create(&threads[1],NULL,elevatorLoader,NULL);assert(rc == 0);
+  rc = pthread_create(&threads[2],NULL,elevatorUnloader,NULL);assert(rc == 0);
 
-  for(i = 0; i < loops; i++)
+  /*for(i = 0; i < loops; i++)
   {
     tempPerson = new Person(first+NumberToString(10-i),last+NumberToString(i),1,1);
     delete tempPerson;
-  }
+  }*/
 
   rc = pthread_join(threads[0],NULL);assert(rc == 0);
   rc = pthread_join(threads[1],NULL);assert(rc == 0);
+  rc = pthread_join(threads[2],NULL);assert(rc == 0);
 
   delete floor;
   delete elevator;

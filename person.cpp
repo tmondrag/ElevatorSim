@@ -28,5 +28,5 @@ Person::~Person()
 
 double Person::elapsedTime()
 {
-  return difftime(startTime,time(NULL));
+  return 0-difftime(startTime,time(NULL));
 }
