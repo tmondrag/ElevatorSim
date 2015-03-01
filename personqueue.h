@@ -29,9 +29,7 @@ class PersonStack
 {
 private:
   pnode_t * head;
-  pnode_t * tail;
   pthread_mutex_t headLock;
-  pthread_mutex_t tailLock;
 public:
   PersonStack();
   ~PersonStack();

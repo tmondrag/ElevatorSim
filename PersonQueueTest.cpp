@@ -14,10 +14,11 @@
 //elevator thread consume from queue and produce to stack
 //cleanup thread will consume from stack
 
-//cond_t qfill, sfill;
-//mutex_t qmutex, smutex;
-PersonQueue floor;
-PersonStack elevator;
+pthread_cond_t qfill, sfill;
+pthread_mutex_t qmutex, smutex;
+int qcount,scount;
+PersonQueue * floor;
+PersonStack * elevator;
 
 template <typename T>
   std::string NumberToString ( T Number )
@@ -43,7 +44,7 @@ int StringToInt(char* s)
   return x;
 }
 
-/*void * queueProducer(void * arg)
+/*void * populatr(void * arg)
 {
   int i, rc;
   for (i = 0; i < loops; i++)
@@ -58,10 +59,10 @@ int StringToInt(char* s)
   Pthread_mutex_unlock(&mutex); // p6
   }
 }
-
-void * consumer(void * arg)
+*/
+void * elevatorLoader(void * arg)
 {
-  int i;
+  /*int i;
   for (i = 0; i < loops; i++)
   {
     Pthread_mutex_lock(&mutex); // c1
@@ -71,26 +72,61 @@ void * consumer(void * arg)
     Pthread_cond_signal(&empty); // c5
     Pthread_mutex_unlock(&mutex); // c6
     printf("%d\n", tmp);
-  }
-}*/
+  }*/
+  return NULL;
+}
+
+void * elevatorUnloader(void * arg)
+{
+  return NULL;
+}
+
 
 int main(int argc, char *argv[])
 {
   assert(argc > 0);
   int loops = StringToInt(argv[1]);
   int i = 0;
-  Person * people[loops];
+  int rc;
+  Person * people[1];
   std::string first = "First Name";
   std::string last = "person";
+
+  elevator = new PersonStack;
+  floor = new PersonQueue;
+
+  // -- single thread test -- //
   for(i = 0; i < loops; i++)
   {
-
-    people[i] = new Person(first,last+NumberToString(i),1,1);
-    floor.enqueue(people[i]);
-    elevator.push(floor.dequeue());
-    elevator.pop();
-    delete people[i];
+    people[0] = new Person(first,last+NumberToString(i),1,1);
+    floor->enqueue(people[0]);
+    elevator->push(floor->dequeue());
+    elevator->pop();
+    delete people[0];
   }
-    return 0;
+
+  // -- single stack and queue, multiple threads -- //
+  pthread_t threads[3];
+  rc = pthread_mutex_init(&smutex,NULL);assert(rc == 0);
+  rc = pthread_mutex_init(&qmutex,NULL);assert(rc == 0);
+  scount = qcount = 0;
+  rc = pthread_cond_init(&sfill,NULL);assert(rc == 0);
+  rc = pthread_cond_init(&qfill,NULL);assert(rc == 0);
+
+  rc = pthread_create(&threads[0],NULL,elevatorLoader,NULL);assert(rc == 0);
+  rc = pthread_create(&threads[1],NULL,elevatorUnloader,NULL);assert(rc == 0);
+
+  for(i = 0; i < loops; i++)
+  {
+    people[0] = new Person(first+NumberToString(10-i),last+NumberToString(i),1,1);
+    delete people[0];
+  }
+
+  rc = pthread_join(threads[0],NULL);assert(rc == 0);
+  rc = pthread_join(threads[1],NULL);assert(rc == 0);
+
+  delete floor;
+  delete elevator;
+  return 0;
 }
 

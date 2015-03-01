@@ -77,6 +77,7 @@ PersonQueue::~PersonQueue()
 {
   while(!isEmpty())
     delete dequeue();
+  delete tail;
 }
 
 PersonStack::PersonStack()
@@ -84,10 +85,9 @@ PersonStack::PersonStack()
   int rc;
   pnode_t * tmp = new pnode_t;
   tmp->next = NULL;
-  head = /*tail =*/ tmp;
+  head = tmp;
   rc = pthread_mutex_init(&headLock,NULL);
   assert(rc == 0);
-  //pthread_mutex_init(&tailLock,NULL);
 }
 
 void PersonStack::push(Person * p)
@@ -148,4 +148,5 @@ PersonStack::~PersonStack()
 {
   while(!isEmpty())
     delete pop();
+  delete head;
 }
