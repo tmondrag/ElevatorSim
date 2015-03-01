@@ -88,21 +88,27 @@ int main(int argc, char *argv[])
   int loops = StringToInt(argv[1]);
   int i = 0;
   int rc;
-  Person * people[1];
+  Person * tempPerson;
   std::string first = "First Name";
   std::string last = "person";
 
-  elevator = new PersonStack;
-  floor = new PersonQueue;
+  elevator = new PersonStack();
+  floor = new PersonQueue();
 
   // -- single thread test -- //
   for(i = 0; i < loops; i++)
   {
-    people[0] = new Person(first,last+NumberToString(i),1,1);
-    floor->enqueue(people[0]);
-    elevator->push(floor->dequeue());
-    elevator->pop();
-    delete people[0];
+    tempPerson = new Person(first,last+NumberToString(i),1,2);
+    floor->enqueue(tempPerson);
+
+  }
+  for(i = 0; i < loops; i++)
+  {
+    tempPerson = floor->dequeue();
+    elevator->push(tempPerson);
+    tempPerson = elevator->pop();
+    tempPerson->currfloor = 2;
+    delete tempPerson;
   }
 
   // -- single stack and queue, multiple threads -- //
@@ -118,8 +124,8 @@ int main(int argc, char *argv[])
 
   for(i = 0; i < loops; i++)
   {
-    people[0] = new Person(first+NumberToString(10-i),last+NumberToString(i),1,1);
-    delete people[0];
+    tempPerson = new Person(first+NumberToString(10-i),last+NumberToString(i),1,1);
+    delete tempPerson;
   }
 
   rc = pthread_join(threads[0],NULL);assert(rc == 0);

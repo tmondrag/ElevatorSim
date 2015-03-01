@@ -84,6 +84,7 @@ PersonStack::PersonStack()
 {
   int rc;
   pnode_t * tmp = new pnode_t;
+  assert(tmp != NULL);
   tmp->next = NULL;
   head = tmp;
   rc = pthread_mutex_init(&headLock,NULL);
@@ -116,7 +117,7 @@ Person * PersonStack::pop()
     assert(rc == 0);
     return NULL; // Stack was empty
   }
-  Person * tempP = newHead->value;
+  Person * tempP = temp->value;
   head = newHead;
   rc = pthread_mutex_unlock(&headLock);
   assert(rc == 0);

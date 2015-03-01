@@ -2,8 +2,8 @@
 
 
 Person::Person(std::string first,std::string last,int start,int destiny)
-    :firstName(first),lastName(last),startFloor(start),currfloor(destiny),
-      destination(start)
+    :firstName(first),lastName(last),startFloor(start),currfloor(start),
+      destination(destiny)
 {
   startTime = time(NULL);
   std::cout << firstName << ' ' << lastName << " has arrived on floor " << startFloor;
