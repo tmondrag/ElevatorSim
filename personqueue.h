@@ -8,7 +8,7 @@ typedef struct pnode_t
 {
   Person * value;
   struct pnode_t * next;
-} ;
+} __pnode_t;
 
 class PersonQueue
 {
@@ -35,7 +35,7 @@ private:
 public:
   PersonStack();
   ~PersonStack();
-  void push();
+  void push(Person * p);
   Person * pop();
   bool isEmpty();
 };

@@ -75,14 +75,8 @@ bool PersonQueue::isEmpty()
 
 PersonQueue::~PersonQueue()
 {
-  int rc;
-  rc = pthread_mutex_lock(&headLock);
-  assert(rc == 0);
-  Person * temp = head->next->value;
-  rc = pthread_mutex_unlock(&headLock);
-  assert(rc == 0);
-  while(temp != NULL)
-    temp = dequeue();
+  while(!isEmpty())
+    delete dequeue();
 }
 
 PersonStack::PersonStack()
@@ -103,9 +97,9 @@ void PersonStack::push(Person * p)
   tmp->value = p;
 
   rc = pthread_mutex_lock(&headLock);
-  assert(rc == 0)
-  tmp->next = head->next->next;
-  head->next = tmp;
+  assert(rc == 0);
+  tmp->next = head;
+  head = tmp;
   rc = pthread_mutex_unlock(&headLock);
   assert(rc == 0);
 }
@@ -152,11 +146,6 @@ bool PersonStack::isEmpty()
 
 PersonStack::~PersonStack()
 {
-  int rc = pthread_mutex_lock(&headLock);
-  assert(rc == 0);
-  Person * temp = head->next->value;
-  rc = pthread_mutex_unlock(&headLock);
-  assert(rc == 0);
-  while(temp != NULL)
-    temp = pop();
+  while(!isEmpty())
+    delete pop();
 }
