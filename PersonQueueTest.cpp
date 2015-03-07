@@ -67,7 +67,7 @@ void * populator(void * arg)
 
 void * elevatorLoader(void * arg)
 {
-  int i,rc,l;
+  int i,rc;
   Person * tmp;
   for (i = 0; i < loops; i++)
   {
