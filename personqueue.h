@@ -13,10 +13,12 @@ typedef struct pnode_t
 class PersonQueue
 {
 private:
+  int qcount;
   pnode_t * head;
   pnode_t * tail;
   pthread_mutex_t headLock;
   pthread_mutex_t tailLock;
+  pthread_cond_t qfill;
 public:
   PersonQueue();
   ~PersonQueue();
@@ -28,8 +30,10 @@ public:
 class PersonStack
 {
 private:
+  int scount;
   pnode_t * head;
   pthread_mutex_t headLock;
+  pthread_cond_t sfill;
 public:
   PersonStack();
   ~PersonStack();
