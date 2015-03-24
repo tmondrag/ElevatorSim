@@ -9,5 +9,5 @@ int main(int argc,char* argv[])
 
   while(i < 10000000)
       i++;
-  p1.currfloor = 6;
+  p1.currfloor(6);
 }

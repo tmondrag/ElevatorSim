@@ -19,8 +19,8 @@ int mult,loops;
 PersonQueue * floor;
 PersonStack * elevator;
 
-std::string first = "First Name";
-std::string last = "person";
+std::string first = "Timmy ";
+std::string last = "Lounds ";
 
 template <typename T>
   std::string NumberToString ( T Number )
@@ -49,10 +49,11 @@ int StringToInt(char* s)
 void * populator(void * arg)
 {
   int i;
+  long int tid = (long int)arg;
   Person * tmp;
   for(i = 0; i < loops/mult; i++)
   {
-    tmp = new Person(first,last+NumberToString(i),1,2);
+    tmp = new Person(first+NumberToString(tid),last+NumberToString(i),1,2);
     floor->enqueue(tmp);
   }
   return NULL;
@@ -78,7 +79,7 @@ void * elevatorUnloader(void * arg)
     for (i = 0; i < loops/mult; i++)
     {
       tmp = elevator->pop();
-      tmp->currfloor=tmp->destination;
+      tmp->currfloor(tmp->destination());
       delete tmp;
     }
   return NULL;
@@ -87,7 +88,7 @@ void * elevatorUnloader(void * arg)
 
 int main(int argc, char *argv[])
 {
-  int i = 0;
+  long int i = 0;
   int rc;
   Person * tempPerson;
 
@@ -120,7 +121,7 @@ int main(int argc, char *argv[])
     tempPerson = floor->dequeue();
     elevator->push(tempPerson);
     tempPerson = elevator->pop();
-    tempPerson->currfloor = 2;
+    tempPerson->currfloor(2);
     delete tempPerson;
   }
 
@@ -128,7 +129,7 @@ int main(int argc, char *argv[])
   pthread_t threads[3*mult];
   for(i = 0; i < mult; i++)
   {
-  rc = pthread_create(&threads[0+3*i],NULL,populator,NULL);assert(rc == 0);
+  rc = pthread_create(&threads[0+3*i],NULL,populator,(void*) i);assert(rc == 0);
   rc = pthread_create(&threads[1+3*i],NULL,elevatorLoader,NULL);assert(rc == 0);
   rc = pthread_create(&threads[2+3*i],NULL,elevatorUnloader,NULL);assert(rc == 0);
   }
