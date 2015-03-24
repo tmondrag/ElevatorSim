@@ -6,6 +6,7 @@ Person::Person(std::string first,std::string last,int start,int destiny)
       destination(destiny)
 {
   startTime = time(NULL);
+  std::flush;
   std::cout << firstName << ' ' << lastName << " has arrived on floor " << startFloor;
   std::cout << std::endl;
 }
@@ -14,11 +15,13 @@ Person::~Person()
 {
   if(currfloor == destination)
   {
+    std::flush;
     std::cout << firstName << ' ' << lastName << " ended up on floor " << currfloor;
     std::cout << " after " << elapsedTime() << " seconds." << std::endl;
   }
   else
   {
+    std::flush;
     std::cout << firstName << ' ' << lastName << " ended up on floor " << currfloor;
     std::cout << " after " << elapsedTime() << " seconds." << std::endl;
     std::cout << firstName << ' ' << lastName << " wanted to be on floor ";

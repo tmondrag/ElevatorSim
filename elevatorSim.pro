@@ -7,9 +7,11 @@ SOURCES += main.cpp \
     person.cpp \
     PersonTest.cpp \
     personqueue.cpp \
-    PersonQueueTest.cpp
+    PersonQueueTest.cpp \
+    elevator.cpp
 
 HEADERS += \
     person.h \
-    personqueue.h
+    personqueue.h \
+    elevator.h
 
